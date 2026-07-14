@@ -8,23 +8,48 @@
 // For
 //     io/anyrtc/live/internal/NativePlayObserver
 
+// [人工标注说明] 本文件由 jni_generator.py 自动生成，正常情况下不应手工修改；
+// 以下逐行中文注释是应仓库要求，为了文档说明目的手动添加在生成代码之上的，
+// 不改变任何代码逻辑；若重新运行生成脚本重新生成本文件，这些注释将会丢失。
+
 #ifndef io_anyrtc_live_internal_NativePlayObserver_JNI
+// 头文件保护宏：防止本文件在同一编译单元中被多次 #include 导致重复定义。
 #define io_anyrtc_live_internal_NativePlayObserver_JNI
 
 #include <jni.h>
+// jni_generator_helper.h 提供了 LazyGetClass、JniIntWrapper、as_jint、
+// JniJavaCallContextChecked、CHECK_CLAZZ 等 JNI 生成代码所依赖的基础设施。
 #include "webrtc/sdk/android/src/jni/jni_generator_helper.h"
 
 
 // Step 1: Forward declarations.
+// 本步骤负责声明/定义与 Java 类 io.anyrtc.live.internal.NativePlayObserver
+// 对应的 JNI 层元数据：类的二进制名路径常量，以及缓存该 jclass 的静态变量与
+// 惰性获取该 jclass 的内联访问函数。后续 Step 3 中的各个 trampoline（跳板）
+// 函数都会复用这里生成的 _clazz(env) 访问器来查找 Java 方法。
+// 该模式与 NativePushObserver_JNI.h 中的完全一致，仅类名不同。
 
+// kClassPath_io_anyrtc_live_internal_NativePlayObserver：
+// Java 类 io.anyrtc.live.internal.NativePlayObserver 的 JNI 二进制名
+// （包名用 '/' 分隔），用于 FindClass 查找该类。
 JNI_REGISTRATION_EXPORT extern const char kClassPath_io_anyrtc_live_internal_NativePlayObserver[];
 const char kClassPath_io_anyrtc_live_internal_NativePlayObserver[] =
     "io/anyrtc/live/internal/NativePlayObserver";
 // Leaking this jclass as we cannot use LazyInstance from some threads.
+// g_io_anyrtc_live_internal_NativePlayObserver_clazz：
+// 缓存 NativePlayObserver 对应 jclass 的全局原子指针。使用 std::atomic<jclass>
+// 是为了在多线程环境下安全地做"懒加载 + 缓存"：第一次调用时通过 FindClass
+// 查找并做全局引用（GlobalRef），之后直接复用缓存值，避免重复查找类的开销；
+// 有意不做析构（"leaking"），因为部分线程退出时无法安全使用 LazyInstance。
 JNI_REGISTRATION_EXPORT std::atomic<jclass>
     g_io_anyrtc_live_internal_NativePlayObserver_clazz(nullptr);
 #ifndef io_anyrtc_live_internal_NativePlayObserver_clazz_defined
 #define io_anyrtc_live_internal_NativePlayObserver_clazz_defined
+// io_anyrtc_live_internal_NativePlayObserver_clazz(env)：
+// 惰性获取并缓存 NativePlayObserver 的 jclass 的内联访问函数。内部调用
+// base::android::LazyGetClass，若 g_..._clazz 尚未缓存，则用
+// kClassPath_... 查找类并写入缓存；否则直接返回缓存的 jclass。
+// 后面每个 Java_NativePlayObserver_on* trampoline 函数开头都会调用它来获取 clazz。
 inline jclass io_anyrtc_live_internal_NativePlayObserver_clazz(JNIEnv* env) {
   return base::android::LazyGetClass(env, kClassPath_io_anyrtc_live_internal_NativePlayObserver,
       &g_io_anyrtc_live_internal_NativePlayObserver_clazz);
@@ -33,20 +58,50 @@ inline jclass io_anyrtc_live_internal_NativePlayObserver_clazz(JNIEnv* env) {
 
 
 // Step 2: Constants (optional).
+// 本步骤用于存放从 Java 端 @IntDef/常量字段等生成的 C++ 常量定义；
+// 该 Java 类没有需要导出的常量，所以此处为空。
 
 
 // Step 3: Method stubs.
+// 本步骤为 NativePlayObserver 中每一个被 native 层调用的 Java 方法生成一个
+// "trampoline"（跳板）函数：Java_NativePlayObserver_on*。每个函数都遵循同一
+// 套模式：1) 用一个 static std::atomic<jmethodID> 缓存该方法的 jmethodID；
+// 2) 通过 _clazz(env) 拿到 jclass 并用 CHECK_CLAZZ 校验其有效性；
+// 3) 用 JniJavaCallContextChecked::Init 惰性查找方法签名对应的 jmethodID
+//    （查到后写入缓存，异常检查由 Checked 版本的 call context 负责）；
+// 4) 将 C++/native 参数类型转换为 JNI 类型（如 JniIntWrapper -> jint，
+//    JavaRef<jstring>/<jbyteArray>/<jobject> -> 对应的 JNI 句柄），再调用
+//    env->CallVoidMethod 在 Java 对象 obj 上实际调用该方法。下面对第一个
+//    函数做完整逐行说明，后续函数只在参数/方法名不同的地方做针对性注释。
 
+// 缓存 onError(int, String, String) 方法的 jmethodID，首次调用后写入，
+// 后续调用直接复用，避免每次都做方法查找。
 static std::atomic<jmethodID> g_io_anyrtc_live_internal_NativePlayObserver_onError(nullptr);
+// Java_NativePlayObserver_onError：native -> Java 的跳板函数，对应 Java 端
+// NativePlayObserver.onError(int code, String msg, String extraInfo)。
+// 参数：env 为当前线程的 JNIEnv；obj 为 Java 侧 NativePlayObserver 实例的引用；
+// code 为错误码（native int，通过 JniIntWrapper 传入以支持隐式转换）；
+// msg 为错误描述字符串；extraInfo 为附加信息字符串（均为 JavaRef<jstring>，
+// 即已持有的局部/全局 Java 字符串引用）。
 static void Java_NativePlayObserver_onError(JNIEnv* env, const base::android::JavaRef<jobject>& obj,
     JniIntWrapper code,
     const base::android::JavaRef<jstring>& msg,
     const base::android::JavaRef<jstring>& extraInfo) {
+  // 获取（惰性初始化并缓存）NativePlayObserver 的 jclass。
   jclass clazz = io_anyrtc_live_internal_NativePlayObserver_clazz(env);
+  // CHECK_CLAZZ：调试期校验宏，确认 obj 确实是 clazz（或其子类）的实例，
+  // 且 clazz 有效；校验失败时按其实现通常会触发断言/日志，帮助尽早发现
+  // JNI 层类型不匹配的问题（具体实现在 jni_generator_helper.h 之外）。
   CHECK_CLAZZ(env, obj.obj(),
       io_anyrtc_live_internal_NativePlayObserver_clazz(env));
 
+  // JniJavaCallContextChecked：封装了一次“查找方法 + 调用后异常检查”的
+  // 上下文对象；构造后必须调用 Init 完成方法查找。
   jni_generator::JniJavaCallContextChecked call_context;
+  // Init<TYPE_INSTANCE>：表示这是一个实例方法（非 static）。内部逻辑：
+  // 若 g_..._onError 缓存为空，则用方法名 "onError" 与 JNI 签名
+  // "(ILjava/lang/String;Ljava/lang/String;)V" 调用 GetMethodID 查找该方法，
+  // 并写入缓存；若缓存已存在则直接复用，避免重复反射查找。
   call_context.Init<
       base::android::MethodID::TYPE_INSTANCE>(
           env,
@@ -55,19 +110,28 @@ static void Java_NativePlayObserver_onError(JNIEnv* env, const base::android::Ja
           "(ILjava/lang/String;Ljava/lang/String;)V",
           &g_io_anyrtc_live_internal_NativePlayObserver_onError);
 
+  // 实际的跨语言调用：以 obj 为 this 对象，调用其 onError 方法。
+  // as_jint(code) 把 JniIntWrapper 转换为 jint；msg.obj()/extraInfo.obj()
+  // 取出底层 jstring 句柄。方法返回 void，故使用 CallVoidMethod。
      env->CallVoidMethod(obj.obj(),
           call_context.base.method_id, as_jint(code), msg.obj(), extraInfo.obj());
 }
 
+// 同上一函数（onError）模式：缓存 onWarning(int, String, String) 的 jmethodID。
 static std::atomic<jmethodID> g_io_anyrtc_live_internal_NativePlayObserver_onWarning(nullptr);
+// Java_NativePlayObserver_onWarning：对应 Java 端
+// onWarning(int code, String msg, String extraInfo)，参数含义与 onError 相同
+// （code=警告码，msg=警告描述，extraInfo=附加信息），逻辑结构与 onError 完全一致。
 static void Java_NativePlayObserver_onWarning(JNIEnv* env, const base::android::JavaRef<jobject>&
     obj, JniIntWrapper code,
     const base::android::JavaRef<jstring>& msg,
     const base::android::JavaRef<jstring>& extraInfo) {
+  // 获取/缓存 jclass 并校验 obj 类型。
   jclass clazz = io_anyrtc_live_internal_NativePlayObserver_clazz(env);
   CHECK_CLAZZ(env, obj.obj(),
       io_anyrtc_live_internal_NativePlayObserver_clazz(env));
 
+  // 查找并缓存 onWarning 方法的 jmethodID（首次）。
   jni_generator::JniJavaCallContextChecked call_context;
   call_context.Init<
       base::android::MethodID::TYPE_INSTANCE>(
@@ -77,20 +141,30 @@ static void Java_NativePlayObserver_onWarning(JNIEnv* env, const base::android::
           "(ILjava/lang/String;Ljava/lang/String;)V",
           &g_io_anyrtc_live_internal_NativePlayObserver_onWarning);
 
+  // 调用 Java 侧 obj.onWarning(code, msg, extraInfo)。
      env->CallVoidMethod(obj.obj(),
           call_context.base.method_id, as_jint(code), msg.obj(), extraInfo.obj());
 }
 
+// 缓存 onVodPlaybackProcess(int,int,int) 的 jmethodID。
 static std::atomic<jmethodID>
     g_io_anyrtc_live_internal_NativePlayObserver_onVodPlaybackProcess(nullptr);
+// Java_NativePlayObserver_onVodPlaybackProcess：对应 Java 端
+// onVodPlaybackProcess(int allDuration, int currentPlaybackTime,
+//                      int bufferDuration)，用于点播（VOD）播放进度回调：
+// allDuration=媒体总时长，currentPlaybackTime=当前播放位置，
+// bufferDuration=已缓冲时长（通常单位为毫秒）。JNI 签名 "(III)V" 对应
+// 3 个 int 参数。
 static void Java_NativePlayObserver_onVodPlaybackProcess(JNIEnv* env, const
     base::android::JavaRef<jobject>& obj, JniIntWrapper allDuration,
     JniIntWrapper currentPlaybackTime,
     JniIntWrapper bufferDuration) {
+  // 获取/缓存 jclass 并校验 obj 类型。
   jclass clazz = io_anyrtc_live_internal_NativePlayObserver_clazz(env);
   CHECK_CLAZZ(env, obj.obj(),
       io_anyrtc_live_internal_NativePlayObserver_clazz(env));
 
+  // 查找并缓存 onVodPlaybackProcess 方法的 jmethodID。
   jni_generator::JniJavaCallContextChecked call_context;
   call_context.Init<
       base::android::MethodID::TYPE_INSTANCE>(
@@ -100,21 +174,31 @@ static void Java_NativePlayObserver_onVodPlaybackProcess(JNIEnv* env, const
           "(III)V",
           &g_io_anyrtc_live_internal_NativePlayObserver_onVodPlaybackProcess);
 
+  // 调用 Java 侧 obj.onVodPlaybackProcess(allDuration, currentPlaybackTime,
+  // bufferDuration)。
      env->CallVoidMethod(obj.obj(),
           call_context.base.method_id, as_jint(allDuration), as_jint(currentPlaybackTime),
               as_jint(bufferDuration));
 }
 
+// 缓存 onVideoPlayStatusUpdate(int,int,String) 的 jmethodID。
 static std::atomic<jmethodID>
     g_io_anyrtc_live_internal_NativePlayObserver_onVideoPlayStatusUpdate(nullptr);
+// Java_NativePlayObserver_onVideoPlayStatusUpdate：对应 Java 端
+// onVideoPlayStatusUpdate(int status, int reason, String extraInfo)，
+// 用于通知视频播放状态变化：status=播放状态码（如缓冲中/播放中/暂停等），
+// reason=触发该状态变化的原因码，extraInfo=附加说明文本。JNI 签名
+// "(IILjava/lang/String;)V" 表示两个 int 参数加一个 String 参数。
 static void Java_NativePlayObserver_onVideoPlayStatusUpdate(JNIEnv* env, const
     base::android::JavaRef<jobject>& obj, JniIntWrapper status,
     JniIntWrapper reason,
     const base::android::JavaRef<jstring>& extraInfo) {
+  // 获取/缓存 jclass 并校验 obj 类型。
   jclass clazz = io_anyrtc_live_internal_NativePlayObserver_clazz(env);
   CHECK_CLAZZ(env, obj.obj(),
       io_anyrtc_live_internal_NativePlayObserver_clazz(env));
 
+  // 查找并缓存 onVideoPlayStatusUpdate 方法的 jmethodID。
   jni_generator::JniJavaCallContextChecked call_context;
   call_context.Init<
       base::android::MethodID::TYPE_INSTANCE>(
@@ -124,20 +208,29 @@ static void Java_NativePlayObserver_onVideoPlayStatusUpdate(JNIEnv* env, const
           "(IILjava/lang/String;)V",
           &g_io_anyrtc_live_internal_NativePlayObserver_onVideoPlayStatusUpdate);
 
+  // 调用 Java 侧 obj.onVideoPlayStatusUpdate(status, reason, extraInfo)。
      env->CallVoidMethod(obj.obj(),
           call_context.base.method_id, as_jint(status), as_jint(reason), extraInfo.obj());
 }
 
+// 同上一函数（onVideoPlayStatusUpdate）模式：缓存
+// onAudioPlayStatusUpdate(int,int,String) 的 jmethodID。
 static std::atomic<jmethodID>
     g_io_anyrtc_live_internal_NativePlayObserver_onAudioPlayStatusUpdate(nullptr);
+// Java_NativePlayObserver_onAudioPlayStatusUpdate：对应 Java 端
+// onAudioPlayStatusUpdate(int status, int reason, String extraInfo)，
+// 与 onVideoPlayStatusUpdate 结构相同，仅用于通知音频播放状态变化：
+// status=音频播放状态码，reason=原因码，extraInfo=附加说明文本。
 static void Java_NativePlayObserver_onAudioPlayStatusUpdate(JNIEnv* env, const
     base::android::JavaRef<jobject>& obj, JniIntWrapper status,
     JniIntWrapper reason,
     const base::android::JavaRef<jstring>& extraInfo) {
+  // 获取/缓存 jclass 并校验 obj 类型。
   jclass clazz = io_anyrtc_live_internal_NativePlayObserver_clazz(env);
   CHECK_CLAZZ(env, obj.obj(),
       io_anyrtc_live_internal_NativePlayObserver_clazz(env));
 
+  // 查找并缓存 onAudioPlayStatusUpdate 方法的 jmethodID。
   jni_generator::JniJavaCallContextChecked call_context;
   call_context.Init<
       base::android::MethodID::TYPE_INSTANCE>(
@@ -147,18 +240,26 @@ static void Java_NativePlayObserver_onAudioPlayStatusUpdate(JNIEnv* env, const
           "(IILjava/lang/String;)V",
           &g_io_anyrtc_live_internal_NativePlayObserver_onAudioPlayStatusUpdate);
 
+  // 调用 Java 侧 obj.onAudioPlayStatusUpdate(status, reason, extraInfo)。
      env->CallVoidMethod(obj.obj(),
           call_context.base.method_id, as_jint(status), as_jint(reason), extraInfo.obj());
 }
 
+// 缓存 onPlayoutVolumeUpdate(int) 的 jmethodID。与 PushObserver 中
+// onMicrophoneVolumeUpdate(int) 属于同一“单 int 参数”模式。
 static std::atomic<jmethodID>
     g_io_anyrtc_live_internal_NativePlayObserver_onPlayoutVolumeUpdate(nullptr);
+// Java_NativePlayObserver_onPlayoutVolumeUpdate：对应 Java 端
+// onPlayoutVolumeUpdate(int volume)，把播放（扬声器/耳机输出）音量
+// 周期性回调给 Java 层。JNI 签名 "(I)V" 表示一个 int 参数、返回 void。
 static void Java_NativePlayObserver_onPlayoutVolumeUpdate(JNIEnv* env, const
     base::android::JavaRef<jobject>& obj, JniIntWrapper volume) {
+  // 获取/缓存 jclass 并校验 obj 类型。
   jclass clazz = io_anyrtc_live_internal_NativePlayObserver_clazz(env);
   CHECK_CLAZZ(env, obj.obj(),
       io_anyrtc_live_internal_NativePlayObserver_clazz(env));
 
+  // 查找并缓存 onPlayoutVolumeUpdate 方法的 jmethodID。
   jni_generator::JniJavaCallContextChecked call_context;
   call_context.Init<
       base::android::MethodID::TYPE_INSTANCE>(
@@ -168,10 +269,15 @@ static void Java_NativePlayObserver_onPlayoutVolumeUpdate(JNIEnv* env, const
           "(I)V",
           &g_io_anyrtc_live_internal_NativePlayObserver_onPlayoutVolumeUpdate);
 
+  // 调用 Java 侧 obj.onPlayoutVolumeUpdate(volume)。
      env->CallVoidMethod(obj.obj(),
           call_context.base.method_id, as_jint(volume));
 }
 
+// 缓存 onStatisticsUpdate(int,int,int,int,int,int,int) 的 jmethodID。
+// 该方法与 NativePushObserver_JNI.h 中的 onStatisticsUpdate 签名完全相同
+// （同为播放端的统计信息回调），参数含义一致：appCpu/systemCpu 为 CPU 占用，
+// width/height 为分辨率，fps 为帧率，videoBitrate/audioBitrate 为码率。
 static std::atomic<jmethodID>
     g_io_anyrtc_live_internal_NativePlayObserver_onStatisticsUpdate(nullptr);
 static void Java_NativePlayObserver_onStatisticsUpdate(JNIEnv* env, const
@@ -182,10 +288,13 @@ static void Java_NativePlayObserver_onStatisticsUpdate(JNIEnv* env, const
     JniIntWrapper fps,
     JniIntWrapper videoBitrate,
     JniIntWrapper audioBitrate) {
+  // 获取/缓存 jclass 并校验 obj 类型。
   jclass clazz = io_anyrtc_live_internal_NativePlayObserver_clazz(env);
   CHECK_CLAZZ(env, obj.obj(),
       io_anyrtc_live_internal_NativePlayObserver_clazz(env));
 
+  // 查找并缓存 onStatisticsUpdate 方法的 jmethodID；JNI 签名 "(IIIIIII)V"
+  // 对应 7 个 int 参数。
   jni_generator::JniJavaCallContextChecked call_context;
   call_context.Init<
       base::android::MethodID::TYPE_INSTANCE>(
@@ -195,13 +304,31 @@ static void Java_NativePlayObserver_onStatisticsUpdate(JNIEnv* env, const
           "(IIIIIII)V",
           &g_io_anyrtc_live_internal_NativePlayObserver_onStatisticsUpdate);
 
+  // 依次把 7 个 JniIntWrapper 转换为 jint 并传给 Java 侧
+  // obj.onStatisticsUpdate(appCpu, systemCpu, width, height, fps,
+  //                        videoBitrate, audioBitrate)。
      env->CallVoidMethod(obj.obj(),
           call_context.base.method_id, as_jint(appCpu), as_jint(systemCpu), as_jint(width),
               as_jint(height), as_jint(fps), as_jint(videoBitrate), as_jint(audioBitrate));
 }
 
+// 缓存 onRenderVideoFrame(...) 的 jmethodID。这是本文件中参数最复杂的一个
+// trampoline，涉及 jbyteArray（字节数组）与 jobject（java.nio.ByteBuffer）
+// 两种引用类型参数，而不仅仅是 int/String。
 static std::atomic<jmethodID>
     g_io_anyrtc_live_internal_NativePlayObserver_onRenderVideoFrame(nullptr);
+// Java_NativePlayObserver_onRenderVideoFrame：对应 Java 端
+// onRenderVideoFrame(int pixelFormat, int bufferType, byte[] data,
+//                    ByteBuffer buffer, int width, int height, int rotation)，
+// 用于把解码后待渲染的一帧视频回调给 Java 层。参数含义：
+// pixelFormat=像素格式枚举值；bufferType=数据承载方式（例如“走 byte[]”还是
+// “走直接内存 ByteBuffer”的标记）；data=以 Java byte[] 形式携带的帧数据
+// （当 bufferType 指示使用数组时有效）；buffer=以 java.nio.ByteBuffer
+// （直接内存）形式携带的帧数据（当 bufferType 指示使用 ByteBuffer 时有效）；
+// width/height=帧宽高；rotation=需要应用的旋转角度。
+// JNI 签名 "(II[BLjava/nio/ByteBuffer;III)V" 依次对应：
+// I=pixelFormat, I=bufferType, [B=byte[] data, Ljava/nio/ByteBuffer;=buffer,
+// I=width, I=height, I=rotation, V=返回 void。
 static void Java_NativePlayObserver_onRenderVideoFrame(JNIEnv* env, const
     base::android::JavaRef<jobject>& obj, JniIntWrapper pixelFormat,
     JniIntWrapper bufferType,
@@ -210,10 +337,12 @@ static void Java_NativePlayObserver_onRenderVideoFrame(JNIEnv* env, const
     JniIntWrapper width,
     JniIntWrapper height,
     JniIntWrapper rotation) {
+  // 获取/缓存 jclass 并校验 obj 类型。
   jclass clazz = io_anyrtc_live_internal_NativePlayObserver_clazz(env);
   CHECK_CLAZZ(env, obj.obj(),
       io_anyrtc_live_internal_NativePlayObserver_clazz(env));
 
+  // 查找并缓存 onRenderVideoFrame 方法的 jmethodID。
   jni_generator::JniJavaCallContextChecked call_context;
   call_context.Init<
       base::android::MethodID::TYPE_INSTANCE>(
@@ -223,20 +352,33 @@ static void Java_NativePlayObserver_onRenderVideoFrame(JNIEnv* env, const
           "(II[BLjava/nio/ByteBuffer;III)V",
           &g_io_anyrtc_live_internal_NativePlayObserver_onRenderVideoFrame);
 
+  // 调用 Java 侧 obj.onRenderVideoFrame(pixelFormat, bufferType, data,
+  // buffer, width, height, rotation)：int 参数经 as_jint 转换，
+  // data.obj()/buffer.obj() 分别取出底层 jbyteArray / jobject(ByteBuffer)
+  // 句柄直接传递（引用类型无需额外转换）。
      env->CallVoidMethod(obj.obj(),
           call_context.base.method_id, as_jint(pixelFormat), as_jint(bufferType),
               data.obj(), buffer.obj(), as_jint(width), as_jint(height), as_jint(rotation));
 }
 
+// 缓存 onReceiveSeiMessage(int, byte[]) 的 jmethodID。
 static std::atomic<jmethodID>
     g_io_anyrtc_live_internal_NativePlayObserver_onReceiveSeiMessage(nullptr);
+// Java_NativePlayObserver_onReceiveSeiMessage：对应 Java 端
+// onReceiveSeiMessage(int payloadType, byte[] data)，用于把从视频码流中
+// 解析出的 SEI（Supplemental Enhancement Information，补充增强信息）
+// 消息回调给 Java 层：payloadType=SEI 负载类型标识，data=SEI 原始字节数据。
+// JNI 签名 "(I[B)V" 表示一个 int 参数加一个 byte[] 参数。
+// 这是本文件最后一个 trampoline 函数。
 static void Java_NativePlayObserver_onReceiveSeiMessage(JNIEnv* env, const
     base::android::JavaRef<jobject>& obj, JniIntWrapper payloadType,
     const base::android::JavaRef<jbyteArray>& data) {
+  // 获取/缓存 jclass 并校验 obj 类型。
   jclass clazz = io_anyrtc_live_internal_NativePlayObserver_clazz(env);
   CHECK_CLAZZ(env, obj.obj(),
       io_anyrtc_live_internal_NativePlayObserver_clazz(env));
 
+  // 查找并缓存 onReceiveSeiMessage 方法的 jmethodID。
   jni_generator::JniJavaCallContextChecked call_context;
   call_context.Init<
       base::android::MethodID::TYPE_INSTANCE>(
@@ -246,8 +388,12 @@ static void Java_NativePlayObserver_onReceiveSeiMessage(JNIEnv* env, const
           "(I[B)V",
           &g_io_anyrtc_live_internal_NativePlayObserver_onReceiveSeiMessage);
 
+  // 调用 Java 侧 obj.onReceiveSeiMessage(payloadType, data)：payloadType
+  // 经 as_jint 转换为 jint，data.obj() 取出底层 jbyteArray 句柄。
      env->CallVoidMethod(obj.obj(),
           call_context.base.method_id, as_jint(payloadType), data.obj());
 }
 
+// 头文件保护宏 io_anyrtc_live_internal_NativePlayObserver_JNI 的结束标记，
+// 与文件开头的 #ifndef/#define 相对应。
 #endif  // io_anyrtc_live_internal_NativePlayObserver_JNI
