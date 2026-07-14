@@ -16,7 +16,10 @@ android {
             cmake {
                 abiFilters 'arm64-v8a','armeabi-v7a'
                 cppFlags '-std=c++14 -DANDROID -fno-rtti'
-                arguments = ['-DANDROID_TOOLCHAIN=clang','-DANDROID_STL=c++_shared','-DCMAKE_BUILD_TYPE=Release']
+                // CMAKE_BUILD_TYPE 不在这里固定，改由下面 buildTypes 按 debug/release 分别传入，
+                // 否则 native 层会一直按 Release 编译，即使 Java/Kotlin 侧选的是 debug variant，
+                // 导致 ArLiveLite 源码断点对不上、变量被优化掉，没法正常单步调试
+                arguments = ['-DANDROID_TOOLCHAIN=clang','-DANDROID_STL=c++_shared']
             }
         }
     }
@@ -24,10 +27,23 @@ android {
     buildTypes {
         release {
             minifyEnabled true
+            externalNativeBuild {
+                cmake {
+                    // Release 包保持优化编译，体积更小、性能更好
+                    arguments '-DCMAKE_BUILD_TYPE=Release'
+                }
+            }
         }
         debug {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            externalNativeBuild {
+                cmake {
+                    // Debug 包关闭优化、保留完整调试信息，配合 Android Studio 的 Native/Dual 调试
+                    // 可以直接在 ArLiveLite 的 .cpp 源码里下断点、单步、查看变量
+                    arguments '-DCMAKE_BUILD_TYPE=Debug'
+                }
+            }
         }
     }
     externalNativeBuild {
