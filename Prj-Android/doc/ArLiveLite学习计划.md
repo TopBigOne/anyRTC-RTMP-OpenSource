@@ -1,7 +1,10 @@
 # ArLiveLite 学习计划
 
 > 面向：已有 10 年 Android 开发经验、目标是吃透 C++ 层"编解码 + 音视频传输"的学习者。默认已了解 Java 层（org.webrtc / io.anyrtc.live），不再安排 Java 层学习。
-> 配套文档：[技术架构](./ArLiveLite技术架构.md) · [具体功能](./ArLiveLite具体功能.md) · [C++技术点](./ArLiveLite用到的C++技术点.md) · [难点和复杂](./ArLiveLite%20难点和复杂.md)
+> 配套文档：[技术架构](./ArLiveLite技术架构.md) · 
+> [具体功能](./ArLiveLite具体功能.md) · 
+> [C++技术点](./ArLiveLite用到的C++技术点.md) · 
+> [难点和复杂](./ArLiveLite%20难点和复杂.md)
 
 ## 学习方式建议
 
@@ -29,7 +32,9 @@
 - 目标：理解 Java ↔ Native 数据/控制怎么跨界，这是后面所有阶段的地基
 - 阅读顺序（按信息密度排序）：
   1. `Prj-Android/liveplayer/src/main/cpp/jni/util/ClassreferenceHolder.h/.cc` —— 先理解 `FindClass` 陷阱，这是所有内容的前提知识
-  2. `Prj-Android/liveplayer/src/main/cpp/jni/LiveEngine.cpp` —— 通读 `initWebRTC`、`makeNativeInstance`、`nativeCreatePushKit`/`nativeStartPush` 这条创建/启动推流的调用链；重点精读 `:872-962` 的 `LibYuvBridge`（DirectByteBuffer 零拷贝范例）
+  2. `Prj-Android/liveplayer/src/main/cpp/jni/LiveEngine.cpp`
+     *  通读 `initWebRTC`、`makeNativeInstance`、`nativeCreatePushKit`/`nativeStartPush`
+     * 这条创建/启动推流的调用链；重点精读 `:872-962` 的 `LibYuvBridge`（DirectByteBuffer 零拷贝范例）
   3. `Prj-Android/liveplayer/src/main/cpp/jni/liveEngine/ArLivePushEvent.cpp` + `NativePushObserver_JNI.h` —— 理解 native 线程回调 Java 的标准模型（全局引用 + AttachCurrentThreadIfNeeded + atomic jmethodID 缓存）
   4. `Prj-Android/liveplayer/src/main/cpp/jni/android/VideoCameraCapturer.cpp` + `AndroidContext.cpp` —— 对照第 2 步的句柄方向，理解"this 指针往返"的另一个方向
   5. `Prj-Android/liveplayer/src/main/cpp/jni/liveEngine/AndroidDeviceManager.cpp` —— 摄像头切换的"先销毁后重建"模式、`VideoTrackSourceProxy` 跨线程代理
