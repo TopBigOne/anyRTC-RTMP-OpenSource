@@ -88,8 +88,8 @@
 		6384B43326F6235900B2DF00 /* frame.c in Sources */ = {isa = PBXBuildFile; fileRef = 6384B37D26F6235700B2DF00 /* frame.c */; };
 		6384B43426F6235900B2DF00 /* backpred.c in Sources */ = {isa = PBXBuildFile; fileRef = 6384B38026F6235700B2DF00 /* backpred.c */; };
 		63E6AA8B2704066C009BC628 /* video_renderer.cc in Sources */ = {isa = PBXBuildFile; fileRef = 63E6AA7F2704066C009BC628 /* video_renderer.cc */; };
-		8A275DF127D5B0A800444565 /* ArLive2Engine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A275DF027D5B0A800444565 /* ArLive2Engine.cpp */; };
-		8A275DF327D5B0C300444565 /* PlatformImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A275DF227D5B0C300444565 /* PlatformImpl.cpp */; };
+		8A275DF127D5B0A800444565 /* ArLive2Engine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A275DF027D5B0A800444565 /* ArLive2Engine.cpp */; settings = {COMPILER_FLAGS = "-x objective-c++"; }; };
+		8A275DF327D5B0C300444565 /* PlatformImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A275DF227D5B0C300444565 /* PlatformImpl.cpp */; settings = {COMPILER_FLAGS = "-x objective-c++"; }; };
 		8AE68AF52A95E7AE002069F0 /* ArFFWriter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8AE68AF12A95E7AD002069F0 /* ArFFWriter.cpp */; };
 		8AE68AF62A95E7AE002069F0 /* ARFFPusher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8AE68AF32A95E7AD002069F0 /* ARFFPusher.cpp */; };
 /* End PBXBuildFile section */

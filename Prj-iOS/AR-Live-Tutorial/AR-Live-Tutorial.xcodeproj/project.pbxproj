@@ -472,9 +472,9 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = "ARLive-ScreenShare-Extension/ARLive-ScreenShare-Extension.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 75Y57VZU8H;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "ARLive-ScreenShare-Extension/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "ARLive-ScreenShare-Extension";
@@ -490,7 +490,7 @@
 					"$(PROJECT_DIR)/ARLive-ScreenShare-Extension",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.dync.rtmpc.ScreenShare;
+				PRODUCT_BUNDLE_IDENTIFIER = com.learn.webrtc.ScreenShare;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
@@ -509,9 +509,9 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = "ARLive-ScreenShare-Extension/ARLive-ScreenShare-Extension.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 75Y57VZU8H;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "ARLive-ScreenShare-Extension/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "ARLive-ScreenShare-Extension";
@@ -527,7 +527,7 @@
 					"$(PROJECT_DIR)/ARLive-ScreenShare-Extension",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.dync.rtmpc.ScreenShare;
+				PRODUCT_BUNDLE_IDENTIFIER = com.learn.webrtc.ScreenShare;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
@@ -664,9 +664,9 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "AR-Live-Tutorial/AR-Live-Tutorial.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 75Y57VZU8H;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "AR-Live-Tutorial/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
@@ -675,7 +675,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.2.4;
-				PRODUCT_BUNDLE_IDENTIFIER = com.dync.rtmpc;
+				PRODUCT_BUNDLE_IDENTIFIER = com.learn.webrtc;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
@@ -691,9 +691,9 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "AR-Live-Tutorial/AR-Live-Tutorial.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 75Y57VZU8H;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "AR-Live-Tutorial/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
@@ -702,7 +702,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.2.4;
-				PRODUCT_BUNDLE_IDENTIFIER = com.dync.rtmpc;
+				PRODUCT_BUNDLE_IDENTIFIER = com.learn.webrtc;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
